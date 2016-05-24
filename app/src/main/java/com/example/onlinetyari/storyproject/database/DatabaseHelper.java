@@ -49,6 +49,16 @@ public class DatabaseHelper extends SQLiteOpenHelper implements DatabaseHelperIn
     public static final String KEY_USER_IS_FOLLOWING = "is_following";
     public static final String KEY_USER_CREATED_ON = "createdOn";
 
+    private static DatabaseHelper sInstance;
+
+    public static synchronized DatabaseHelper getInstance(Context context) {
+        if (sInstance == null) {
+            sInstance = new DatabaseHelper(context.getApplicationContext());
+        }
+
+        return sInstance;
+    }
+
     private DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -103,6 +113,8 @@ public class DatabaseHelper extends SQLiteOpenHelper implements DatabaseHelperIn
     @Override
     public void addStory(Story story) {
 
+        SQLiteDatabase db = getWritableDatabase();
+
     }
 
     @Override
@@ -112,6 +124,8 @@ public class DatabaseHelper extends SQLiteOpenHelper implements DatabaseHelperIn
 
     @Override
     public void addUser(User user) {
+
+        SQLiteDatabase db = getWritableDatabase();
 
     }
 }

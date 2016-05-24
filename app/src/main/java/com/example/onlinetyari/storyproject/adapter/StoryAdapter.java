@@ -1,6 +1,7 @@
 package com.example.onlinetyari.storyproject.adapter;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,7 +20,15 @@ import java.util.List;
  */
 public class StoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    List<Story> mStory;
+    private List<Story> mStory;
+    private Context context;
+    private Resources resources;
+
+    public StoryAdapter(List<Story> mStory, Context context, Resources resources) {
+        this.mStory = mStory;
+        this.context = context;
+        this.resources = resources;
+    }
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {

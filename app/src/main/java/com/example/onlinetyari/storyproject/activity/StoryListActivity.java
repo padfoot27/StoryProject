@@ -2,11 +2,17 @@ package com.example.onlinetyari.storyproject.activity;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.onlinetyari.storyproject.R;
+import com.example.onlinetyari.storyproject.adapter.StoryAdapter;
+import com.example.onlinetyari.storyproject.pojo.Story;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -14,8 +20,17 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
+
+import rx.Observable;
+import rx.functions.Func0;
 
 public class StoryListActivity extends AppCompatActivity {
+
+    public StoryAdapter storyAdapter;
+    public RecyclerView storyRecylerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,6 +38,14 @@ public class StoryListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_story_list);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        storyAdapter = new StoryAdapter(new ArrayList<>(), this, getResources());
+        storyRecylerView = (RecyclerView) findViewById(R.id.story_list);
+
+        assert storyRecylerView != null;
+
+        storyRecylerView.setAdapter(storyAdapter);
+
     }
 
     @Override
@@ -74,5 +97,20 @@ public class StoryListActivity extends AppCompatActivity {
             return writer.toString();
 
         else return null;
+    }
+
+    public Observable<List<Story>> getStoryListFromJson(String json) {
+
+        String storyJson = getJSON(R.raw.story);
+
+        if (storyJson == null)
+            return null;
+
+        Type collectionType = new TypeToken<List<Story>>(){}.getType();
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        Gson gson = gsonBuilder.create();
+        final List<Story> storyList = gson.fromJson(storyJson, collectionType);
+
+        return Observable.defer(() -> Observable.just(storyList));
     }
 }
