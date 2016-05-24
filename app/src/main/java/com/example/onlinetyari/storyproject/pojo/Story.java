@@ -1,21 +1,54 @@
 package com.example.onlinetyari.storyproject.pojo;
 
+import com.google.gson.annotations.Expose;
+
 /**
  * Created by Siddharth Verma on 24/5/16.
  */
 public class Story {
 
+    @Expose
     public String description;
+
+    @Expose
     public String id;
+
+    @Expose
     public String verb;
+
+    @Expose
     public String db;
+
+    @Expose
     public String url;
+
+    @Expose
     public String si;
+
+    @Expose
     public String type;
+
+    @Expose
     public String title;
-    public String like_flag;
-    public String likes_count;
-    public String comment_count;
+
+    @Expose
+    public Integer like_flag;
+
+    @Expose
+    public Integer likes_count;
+
+    @Expose
+    public Integer comment_count;
+
+    public User user;
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
 
     public String getDescription() {
         return description;
@@ -81,27 +114,27 @@ public class Story {
         this.title = title;
     }
 
-    public String getLike_flag() {
+    public Integer getLike_flag() {
         return like_flag;
     }
 
-    public void setLike_flag(String like_flag) {
+    public void setLike_flag(Integer like_flag) {
         this.like_flag = like_flag;
     }
 
-    public String getLikes_count() {
+    public Integer getLikes_count() {
         return likes_count;
     }
 
-    public void setLikes_count(String likes_count) {
+    public void setLikes_count(Integer likes_count) {
         this.likes_count = likes_count;
     }
 
-    public String getComment_count() {
+    public Integer getComment_count() {
         return comment_count;
     }
 
-    public void setComment_count(String comment_count) {
+    public void setComment_count(Integer comment_count) {
         this.comment_count = comment_count;
     }
 }

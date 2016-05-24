@@ -14,7 +14,6 @@ import com.example.onlinetyari.storyproject.R;
 public class StoryViewHolder extends RecyclerView.ViewHolder {
 
     TextView title;
-    TextView posted_at;
     TextView posted_by;
     Button follow;
     ImageView story_image;
@@ -26,7 +25,6 @@ public class StoryViewHolder extends RecyclerView.ViewHolder {
         super(view);
 
         title = (TextView) view.findViewById(R.id.title);
-        posted_at = (TextView) view.findViewById(R.id.posted_at);
         posted_by = (TextView) view.findViewById(R.id.posted_by);
         follow = (Button) view.findViewById(R.id.follow);
         story_image = (ImageView) view.findViewById(R.id.story_image);

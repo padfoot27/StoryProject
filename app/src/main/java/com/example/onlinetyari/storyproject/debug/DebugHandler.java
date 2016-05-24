@@ -7,9 +7,9 @@ import com.example.onlinetyari.storyproject.constants.DebugConstants;
 /**
  * Created by Siddharth Verma on 24/5/16.
  */
-public class DebugHandler implements DebugHandlerInterface {
-    @Override
-    public void Log(String logType, String log) {
+public class DebugHandler {
+
+    public static void Log(String logType, String log) {
 
         assert logType != null;
         assert log != null;
@@ -18,8 +18,7 @@ public class DebugHandler implements DebugHandlerInterface {
             Log.i(logType, log);
     }
 
-    @Override
-    public void LogException(String logType, Exception exception) {
+    public static void LogException(String logType, Exception exception) {
 
         assert logType != null;
         assert exception != null;

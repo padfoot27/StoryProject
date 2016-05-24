@@ -3,6 +3,7 @@
     package="com.example.onlinetyari.storyproject">
 
     <application
+        android:name=".StoryProjectApp"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"

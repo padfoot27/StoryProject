@@ -1,12 +1,17 @@
 package com.example.onlinetyari.storyproject.database;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.example.onlinetyari.storyproject.constants.DebugConstants;
+import com.example.onlinetyari.storyproject.debug.DebugHandler;
 import com.example.onlinetyari.storyproject.pojo.Story;
 import com.example.onlinetyari.storyproject.pojo.User;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import rx.Observable;
@@ -77,7 +82,7 @@ public class DatabaseHelper extends SQLiteOpenHelper implements DatabaseHelperIn
                 KEY_STORY_SI + " TEXT, " +
                 KEY_STORY_TYPE + " TEXT, " +
                 KEY_STORY_TITLE + " TEXT, " +
-                KEY_STORY_LIKE_FLAG + " YES/NO, " +
+                KEY_STORY_LIKE_FLAG + " INTEGER, " +
                 KEY_STORY_LIKES_COUNT + " INTEGER, " +
                 KEY_STORY_COMMENT_COUNT + " INTEGER" +
                 ")";
@@ -93,7 +98,7 @@ public class DatabaseHelper extends SQLiteOpenHelper implements DatabaseHelperIn
                 KEY_USER_IMAGE + " TEXT, " +
                 KEY_USER_URL + " TEXT, " +
                 KEY_USER_HANDLE + " TEXT, " +
-                KEY_USER_IS_FOLLOWING + " YES/NO, " +
+                KEY_USER_IS_FOLLOWING + " INTEGER, " +
                 KEY_USER_CREATED_ON + " LONG" +
                 ")";
 
@@ -113,19 +118,236 @@ public class DatabaseHelper extends SQLiteOpenHelper implements DatabaseHelperIn
     @Override
     public void addStory(Story story) {
 
+        if (storyExists(story))
+            return;
+
         SQLiteDatabase db = getWritableDatabase();
 
+        db.beginTransaction();
+
+        try {
+            ContentValues contentValues = new ContentValues();
+
+            contentValues.put(KEY_STORY_DESCRIPTION, story.getDescription());
+            contentValues.put(KEY_STORY_ID, story.getId());
+            contentValues.put(KEY_STORY_VERB, story.getVerb());
+            contentValues.put(KEY_STORY_DB, story.getDb());
+            contentValues.put(KEY_STORY_URL, story.getUrl());
+            contentValues.put(KEY_STORY_SI, story.getSi());
+            contentValues.put(KEY_STORY_TYPE, story.getType());
+            contentValues.put(KEY_STORY_TITLE, story.getTitle());
+            contentValues.put(KEY_STORY_LIKE_FLAG, story.getLike_flag());
+            contentValues.put(KEY_STORY_LIKES_COUNT, story.getLikes_count());
+            contentValues.put(KEY_STORY_COMMENT_COUNT, story.getComment_count());
+
+
+            db.insertOrThrow(TABLE_STORY, null, contentValues);
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            DebugHandler.LogException(DebugConstants.DATABASE_ERROR_LOG, e);
+        } finally {
+            db.endTransaction();
+        }
     }
 
     @Override
     public Observable<List<Story>> getAllStories() {
-        return null;
+
+        SQLiteDatabase db = getReadableDatabase();
+        final List<Story> storyList = new ArrayList<>();
+
+        // Performing inner join of Messages with Contacts on basis of matching of the foreign key of message and id of contact
+        String selectQuery = String.format("SELECT * FROM %s LEFT OUTER JOIN %s ON %s.%s = %s.%s",
+                TABLE_STORY,
+                TABLE_USER,
+                TABLE_STORY,
+                KEY_STORY_DB,
+                TABLE_USER,
+                KEY_USER_ID);
+
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        try {
+            while (cursor.moveToNext()) {
+                Story story = new Story();
+                story.setUrl(cursor.getString(cursor.getColumnIndex(KEY_STORY_URL)));
+                story.setId(cursor.getString(cursor.getColumnIndex(KEY_STORY_ID)));
+                story.setComment_count(cursor.getInt(cursor.getColumnIndex(KEY_STORY_COMMENT_COUNT)));
+                story.setDb(cursor.getString(cursor.getColumnIndex(KEY_STORY_DB)));
+                story.setDescription(cursor.getString(cursor.getColumnIndex(KEY_STORY_DESCRIPTION)));
+                story.setLike_flag(cursor.getInt(cursor.getColumnIndex(KEY_STORY_LIKE_FLAG)));
+                story.setLikes_count(cursor.getInt(cursor.getColumnIndex(KEY_STORY_LIKES_COUNT)));
+                story.setSi(cursor.getString(cursor.getColumnIndex(KEY_STORY_SI)));
+                story.setTitle(cursor.getString(cursor.getColumnIndex(KEY_STORY_TITLE)));
+                story.setType(cursor.getString(cursor.getColumnIndex(KEY_STORY_TYPE)));
+                story.setVerb(cursor.getString(cursor.getColumnIndex(KEY_STORY_VERB)));
+
+                User user = new User();
+                user.setAbout(cursor.getString(cursor.getColumnIndex(KEY_USER_ABOUT)));
+                user.setCreatedOn(cursor.getLong(cursor.getColumnIndex(KEY_USER_CREATED_ON)));
+                user.setFollowers(cursor.getInt(cursor.getColumnIndex(KEY_USER_FOLLOWERS)));
+                user.setFollowing(cursor.getInt(cursor.getColumnIndex(KEY_USER_FOLLOWING)));
+                user.setHandle(cursor.getString(cursor.getColumnIndex(KEY_USER_HANDLE)));
+                user.setId(cursor.getString(cursor.getColumnIndex(KEY_USER_ID)));
+                user.setImage(cursor.getString(cursor.getColumnIndex(KEY_USER_IMAGE)));
+                user.setIs_following(cursor.getInt(cursor.getColumnIndex(KEY_USER_IS_FOLLOWING)));
+                user.setUrl(cursor.getString(cursor.getColumnIndex(KEY_USER_URL)));
+                user.setUsername(cursor.getString(cursor.getColumnIndex(KEY_USER_USERNAME)));
+
+                story.setUser(user);
+                storyList.add(story);
+            }
+
+        } catch (Exception e) {
+            DebugHandler.LogException(DebugConstants.DATABASE_ERROR_LOG, e);
+
+        } finally {
+            if (cursor != null && !cursor.isClosed()) {
+                cursor.close();
+            }
+        }
+
+        return Observable.defer(() -> Observable.just(storyList));
     }
 
     @Override
     public void addUser(User user) {
 
+        if (userExists(user))
+            return;
+
         SQLiteDatabase db = getWritableDatabase();
 
+        db.beginTransaction();
+
+        try {
+            ContentValues contentValues = new ContentValues();
+
+            contentValues.put(KEY_USER_ABOUT, user.getAbout());
+            contentValues.put(KEY_USER_USERNAME, user.getUsername());
+            contentValues.put(KEY_USER_FOLLOWERS, user.getFollowers());
+            contentValues.put(KEY_USER_FOLLOWING, user.getFollowing());
+            contentValues.put(KEY_USER_IMAGE, user.getImage());
+            contentValues.put(KEY_USER_URL, user.getUrl());
+            contentValues.put(KEY_USER_HANDLE, user.getHandle());
+            contentValues.put(KEY_USER_IS_FOLLOWING, user.getIs_following());
+            contentValues.put(KEY_USER_CREATED_ON, user.getCreatedOn());
+
+            db.insertOrThrow(TABLE_USER, null, contentValues);
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            DebugHandler.LogException(DebugConstants.DATABASE_ERROR_LOG, e);
+        } finally {
+            db.endTransaction();
+        }
+
+    }
+
+    @Override
+    public Observable<User> getUser(String userID) {
+
+        SQLiteDatabase db = getReadableDatabase();
+
+        db.beginTransaction();
+
+        String selectQuery = String.format("SELECT * FROM %s WHERE %s = ?",
+                TABLE_USER,
+                KEY_USER_ID);
+
+        Cursor cursor = db.rawQuery(selectQuery, new String[]{String.valueOf(userID)});
+
+        final User user = new User();
+
+        try {
+
+            if (cursor.moveToFirst()) {
+                user.setAbout(cursor.getString(cursor.getColumnIndex(KEY_USER_ABOUT)));
+                user.setCreatedOn(cursor.getLong(cursor.getColumnIndex(KEY_USER_CREATED_ON)));
+                user.setFollowers(cursor.getInt(cursor.getColumnIndex(KEY_USER_FOLLOWERS)));
+                user.setFollowing(cursor.getInt(cursor.getColumnIndex(KEY_USER_FOLLOWING)));
+                user.setHandle(cursor.getString(cursor.getColumnIndex(KEY_USER_HANDLE)));
+                user.setId(cursor.getString(cursor.getColumnIndex(KEY_USER_ID)));
+                user.setImage(cursor.getString(cursor.getColumnIndex(KEY_USER_IMAGE)));
+                user.setIs_following(cursor.getInt(cursor.getColumnIndex(KEY_USER_IS_FOLLOWING)));
+                user.setUrl(cursor.getString(cursor.getColumnIndex(KEY_USER_URL)));
+                user.setUsername(cursor.getString(cursor.getColumnIndex(KEY_USER_USERNAME)));
+                db.setTransactionSuccessful();
+            }
+        } catch (Exception e) {
+            DebugHandler.LogException(DebugConstants.DATABASE_ERROR_LOG, e);
+        } finally {
+            if (cursor != null && !cursor.isClosed())
+                cursor.close();
+            db.endTransaction();
+        }
+        return Observable.defer(() -> Observable.just(user));
+    }
+
+    @Override
+    public boolean storyExists(Story story) {
+
+        SQLiteDatabase db = getReadableDatabase();
+
+        db.beginTransaction();
+
+        String selectQuery = String.format("SELECT %s FROM %s WHERE %s = ?",
+                KEY_STORY_PRIMARY_ID,
+                TABLE_STORY,
+                KEY_STORY_ID);
+
+        boolean returnValue = false;
+
+        Cursor cursor = db.rawQuery(selectQuery, new String[]{String.valueOf(story.getId())});
+
+        try {
+            if (cursor.getCount() > 0) {
+                returnValue = true;
+            }
+            db.setTransactionSuccessful();
+
+        } catch (Exception e) {
+            DebugHandler.LogException(DebugConstants.DATABASE_ERROR_LOG, e);
+
+        } finally {
+            db.endTransaction();
+            if (cursor != null && !cursor.isClosed())
+                cursor.close();
+        }
+
+        return returnValue;
+    }
+
+    @Override
+    public boolean userExists(User user) {
+
+        SQLiteDatabase db = getReadableDatabase();
+
+        db.beginTransaction();
+
+        String selectQuery = String.format("SELECT %s FROM %s WHERE %s = ?",
+                KEY_USER_PRIMARY_ID,
+                TABLE_USER,
+                KEY_USER_ID);
+
+        boolean returnValue = false;
+
+        Cursor cursor = db.rawQuery(selectQuery, new String[]{String.valueOf(user.getId())});
+
+        try {
+            if (cursor.getCount() > 0) {
+                returnValue = true;
+            }
+            db.setTransactionSuccessful();
+
+        } catch (Exception e) {
+            DebugHandler.LogException(DebugConstants.DATABASE_ERROR_LOG, e);
+
+        } finally {
+            db.endTransaction();
+            if (cursor != null && !cursor.isClosed())
+                cursor.close();
+        }
+
+        return returnValue;
     }
 }

@@ -13,7 +13,7 @@ public class User {
     public String image;
     public String url;
     public String handle;
-    public Boolean is_following;
+    public Integer is_following;
     public Long createdOn;
 
     public String getAbout() {
@@ -80,11 +80,11 @@ public class User {
         this.handle = handle;
     }
 
-    public Boolean getIs_following() {
+    public Integer getIs_following() {
         return is_following;
     }
 
-    public void setIs_following(Boolean is_following) {
+    public void setIs_following(Integer is_following) {
         this.is_following = is_following;
     }
 
