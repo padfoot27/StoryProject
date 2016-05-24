@@ -1,6 +1,7 @@
 package com.example.onlinetyari.storyproject.activity;
 
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -12,12 +13,15 @@ import android.view.MenuItem;
 import com.example.onlinetyari.storyproject.R;
 import com.example.onlinetyari.storyproject.StoryDeserializer;
 import com.example.onlinetyari.storyproject.StoryProjectApp;
+import com.example.onlinetyari.storyproject.UserDeserializer;
 import com.example.onlinetyari.storyproject.adapter.StoryAdapter;
 import com.example.onlinetyari.storyproject.database.DatabaseHelper;
 import com.example.onlinetyari.storyproject.pojo.Story;
+import com.example.onlinetyari.storyproject.pojo.User;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.jakewharton.rxbinding.view.RxView;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -31,9 +35,6 @@ import java.util.List;
 
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.functions.Func0;
-import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 public class StoryListActivity extends AppCompatActivity {
@@ -56,14 +57,13 @@ public class StoryListActivity extends AppCompatActivity {
         storyRecylerView.setLayoutManager(new LinearLayoutManager(this));
         storyRecylerView.setAdapter(storyAdapter);
 
-        Observable<List<Story>> jsonObservable = getStoryListFromJson();
 
         Observable<List<Story>> databaseObservable = DatabaseHelper.getInstance(StoryProjectApp.getAppContext()).getAllStories();
+        Observable<List<Story>> jsonObservable = getStoryListFromJson();
 
-        jsonObservable
-                /*.filter(stories -> stories != null)
+        Observable.concat(databaseObservable, jsonObservable)
+                .filter(stories -> !stories.isEmpty())
                 .first()
-                */
                 .flatMap(Observable::from)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -79,6 +79,16 @@ public class StoryListActivity extends AppCompatActivity {
                         storyAdapter.mStory.add(story);
                         storyAdapter.notifyItemChanged(storyAdapter.getItemCount() - 1);
                     }
+                });
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        assert fab != null;
+
+        RxView.clicks(fab)
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .observeOn(Schedulers.io())
+                .subscribe(aVoid -> {
+                    addUserToDatabase();
                 });
     }
 
@@ -147,5 +157,23 @@ public class StoryListActivity extends AppCompatActivity {
         final List<Story> storyList = gson.fromJson(storyJson, collectionType);
 
         return Observable.defer(() -> Observable.just(storyList));
+    }
+
+    public void addUserToDatabase() {
+
+        String userJson = getJSON(R.raw.user);
+
+        if (userJson == null)
+            return;
+
+        Type collectionType = new TypeToken<List<User>>(){}.getType();
+        GsonBuilder gsonBuilder = new GsonBuilder()
+                .registerTypeAdapter(User.class, new UserDeserializer());
+        Gson gson = gsonBuilder.create();
+        final List<User> userList = gson.fromJson(userJson, collectionType);
+
+        for (User user : userList) {
+            DatabaseHelper.getInstance(this).addUser(user);
+        }
     }
 }

@@ -232,6 +232,7 @@ public class DatabaseHelper extends SQLiteOpenHelper implements DatabaseHelperIn
             contentValues.put(KEY_USER_HANDLE, user.getHandle());
             contentValues.put(KEY_USER_IS_FOLLOWING, user.getIs_following());
             contentValues.put(KEY_USER_CREATED_ON, user.getCreatedOn());
+            contentValues.put(KEY_USER_ID, user.getId());
 
             db.insertOrThrow(TABLE_USER, null, contentValues);
             db.setTransactionSuccessful();
@@ -240,7 +241,6 @@ public class DatabaseHelper extends SQLiteOpenHelper implements DatabaseHelperIn
         } finally {
             db.endTransaction();
         }
-
     }
 
     @Override
