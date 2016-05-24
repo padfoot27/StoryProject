@@ -20,7 +20,7 @@ import java.util.List;
  */
 public class StoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private List<Story> mStory;
+    public List<Story> mStory;
     private Context context;
     private Resources resources;
 
@@ -50,11 +50,12 @@ public class StoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         Story story = mStory.get(position);
 
         storyViewHolder.title.setText(story.getTitle());
-        storyViewHolder.posted_by.setText(story.getDb());
+        storyViewHolder.posted_by.setText(story.getUser().getUsername());
+        storyViewHolder.follow.setText("Follow");
         setImage(storyViewHolder.story_image, story.getSi());
         storyViewHolder.story_description.setText(story.getDescription());
-        storyViewHolder.likes.setText(story.getLikes_count());
-        storyViewHolder.comments.setText(story.getComment_count());
+        storyViewHolder.likes.setText(String.valueOf(story.getLikes_count()));
+        storyViewHolder.comments.setText(String.valueOf(story.getComment_count()));
     }
 
     @Override

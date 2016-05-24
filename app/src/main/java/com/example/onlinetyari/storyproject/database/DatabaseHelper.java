@@ -244,7 +244,7 @@ public class DatabaseHelper extends SQLiteOpenHelper implements DatabaseHelperIn
     }
 
     @Override
-    public Observable<User> getUser(String userID) {
+    public User getUser(String userID) {
 
         SQLiteDatabase db = getReadableDatabase();
 
@@ -280,7 +280,7 @@ public class DatabaseHelper extends SQLiteOpenHelper implements DatabaseHelperIn
                 cursor.close();
             db.endTransaction();
         }
-        return Observable.defer(() -> Observable.just(user));
+        return user;
     }
 
     @Override

@@ -18,7 +18,7 @@ public interface DatabaseHelperInterface {
 
     void addUser(User user);
 
-    Observable<User> getUser(String userID);
+    User getUser(String userID);
 
     boolean storyExists(Story story);
 

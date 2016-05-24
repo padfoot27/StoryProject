@@ -2,13 +2,18 @@ package com.example.onlinetyari.storyproject.activity;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.onlinetyari.storyproject.R;
+import com.example.onlinetyari.storyproject.StoryDeserializer;
+import com.example.onlinetyari.storyproject.StoryProjectApp;
 import com.example.onlinetyari.storyproject.adapter.StoryAdapter;
+import com.example.onlinetyari.storyproject.database.DatabaseHelper;
 import com.example.onlinetyari.storyproject.pojo.Story;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -25,7 +30,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 import rx.functions.Func0;
+import rx.functions.Func1;
+import rx.schedulers.Schedulers;
 
 public class StoryListActivity extends AppCompatActivity {
 
@@ -38,14 +47,39 @@ public class StoryListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_story_list);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
+        Log.v("cde","123");
         storyAdapter = new StoryAdapter(new ArrayList<>(), this, getResources());
         storyRecylerView = (RecyclerView) findViewById(R.id.story_list);
 
         assert storyRecylerView != null;
 
+        storyRecylerView.setLayoutManager(new LinearLayoutManager(this));
         storyRecylerView.setAdapter(storyAdapter);
 
+        Observable<List<Story>> jsonObservable = getStoryListFromJson();
+
+        Observable<List<Story>> databaseObservable = DatabaseHelper.getInstance(StoryProjectApp.getAppContext()).getAllStories();
+
+        jsonObservable
+                /*.filter(stories -> stories != null)
+                .first()
+                */
+                .flatMap(Observable::from)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(story -> {
+                    Log.v("abc", story.getTitle());
+                    DatabaseHelper.getInstance(StoryProjectApp.getAppContext()).addStory(story);
+
+                    if (story.user == null) {
+                        story.user = DatabaseHelper.getInstance(StoryProjectApp.getAppContext()).getUser(story.getDb());
+                    }
+
+                    if (!storyAdapter.mStory.contains(story)) {
+                        storyAdapter.mStory.add(story);
+                        storyAdapter.notifyItemChanged(storyAdapter.getItemCount() - 1);
+                    }
+                });
     }
 
     @Override
@@ -99,7 +133,7 @@ public class StoryListActivity extends AppCompatActivity {
         else return null;
     }
 
-    public Observable<List<Story>> getStoryListFromJson(String json) {
+    public Observable<List<Story>> getStoryListFromJson() {
 
         String storyJson = getJSON(R.raw.story);
 
@@ -107,7 +141,8 @@ public class StoryListActivity extends AppCompatActivity {
             return null;
 
         Type collectionType = new TypeToken<List<Story>>(){}.getType();
-        GsonBuilder gsonBuilder = new GsonBuilder();
+        GsonBuilder gsonBuilder = new GsonBuilder()
+                .registerTypeAdapter(Story.class, new StoryDeserializer());
         Gson gson = gsonBuilder.create();
         final List<Story> storyList = gson.fromJson(storyJson, collectionType);
 
