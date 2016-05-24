@@ -14,12 +14,16 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.example.onlinetyari.storyproject.R;
 import com.example.onlinetyari.storyproject.StoryProjectApp;
+import com.example.onlinetyari.storyproject.activity.StoryListActivity;
+import com.example.onlinetyari.storyproject.database.DatabaseHelper;
 import com.example.onlinetyari.storyproject.pojo.Story;
+import com.example.onlinetyari.storyproject.pojo.User;
 import com.jakewharton.rxbinding.view.RxView;
 
 import java.util.List;
 
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
 /**
@@ -31,6 +35,12 @@ public class StoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     public List<Story> mStory;
     private Context context;
     private Resources resources;
+    public OnFollowClickedListener onFollowClickedListener;
+    public String FOLLOW = "Follow";
+
+    public interface OnFollowClickedListener {
+        void onFollowClicked(String userID);
+    }
 
     private RequestListener<String, GlideDrawable> requestListener = new RequestListener<String, GlideDrawable>() {
         @Override
@@ -49,6 +59,7 @@ public class StoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         this.mStory = mStory;
         this.context = context;
         this.resources = resources;
+        this.onFollowClickedListener = (OnFollowClickedListener) context;
     }
 
     @Override
@@ -72,7 +83,16 @@ public class StoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
         storyViewHolder.title.setText(story.getTitle());
         storyViewHolder.posted_by.setText(story.getUser().getUsername());
-        storyViewHolder.follow.setText(R.string.follow);
+
+        if (story.user.getIs_following() != null) {
+            if (story.user.getIs_following() == 0)
+                storyViewHolder.follow.setText(R.string.follow);
+            else storyViewHolder.follow.setText(R.string.following);
+        }
+
+        else
+            storyViewHolder.follow.setText(R.string.follow);
+
         Glide
                 .with(context)
                 .load(mStory.get(position).getSi())
@@ -86,10 +106,21 @@ public class StoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         storyViewHolder.likes.setText(String.format(resources.getString(R.string.likes), story.getLikes_count()));
         storyViewHolder.comments.setText(String.format(resources.getString(R.string.comments), story.getComment_count()));
 
-        RxView.clicks(storyViewHolder.follow)
-                .subscribeOn(AndroidSchedulers.mainThread())
-                .observeOn(Schedulers.io())
-                .subscribe();
+        storyViewHolder.follow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (storyViewHolder.follow.getText().toString().equals(FOLLOW))
+                    storyViewHolder.follow.setText(R.string.following);
+                else storyViewHolder.follow.setText(R.string.follow);
+
+                User user = story.getUser();
+
+                user.setIs_following(user.is_following ^= 1);
+                DatabaseHelper.getInstance(context).updateUser(user);
+                user.setIs_following(user.is_following ^= 1);
+                onFollowClickedListener.onFollowClicked(user.getId());
+            }
+        });
     }
 
     @Override

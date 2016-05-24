@@ -11,9 +11,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.onlinetyari.storyproject.R;
-import com.example.onlinetyari.storyproject.StoryDeserializer;
+import com.example.onlinetyari.storyproject.deserializer.StoryDeserializer;
 import com.example.onlinetyari.storyproject.StoryProjectApp;
-import com.example.onlinetyari.storyproject.UserDeserializer;
+import com.example.onlinetyari.storyproject.deserializer.UserDeserializer;
 import com.example.onlinetyari.storyproject.adapter.StoryAdapter;
 import com.example.onlinetyari.storyproject.database.DatabaseHelper;
 import com.example.onlinetyari.storyproject.pojo.Story;
@@ -37,10 +37,11 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
-public class StoryListActivity extends AppCompatActivity {
+public class StoryListActivity extends AppCompatActivity implements StoryAdapter.OnFollowClickedListener {
 
     public StoryAdapter storyAdapter;
     public RecyclerView storyRecylerView;
+    public List<String> userIDList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,20 +49,39 @@ public class StoryListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_story_list);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        Log.v("cde","123");
         storyAdapter = new StoryAdapter(new ArrayList<>(), this, getResources());
         storyRecylerView = (RecyclerView) findViewById(R.id.story_list);
+        userIDList = new ArrayList<>();
 
         assert storyRecylerView != null;
 
         storyRecylerView.setLayoutManager(new LinearLayoutManager(this));
         storyRecylerView.setAdapter(storyAdapter);
 
+        storyRecylerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
 
-        Observable<List<Story>> databaseObservable = DatabaseHelper.getInstance(StoryProjectApp.getAppContext()).getAllStories();
-        Observable<List<Story>> jsonObservable = getStoryListFromJson();
+                if (!userIDList.isEmpty()) {
+                    int position = 0;
 
-        Observable.concat(databaseObservable, jsonObservable)
+                    for (Story story : storyAdapter.mStory) {
+                        if (userIDList.contains(story.getUser().getId())) {
+                            User user = story.getUser();
+                            user.setIs_following(user.is_following ^= 1);
+                            story.setUser(user);
+                            storyAdapter.notifyItemChanged(position);
+                        }
+                        position += 1;
+                    }
+                }
+
+                userIDList.clear();
+            }
+        });
+
+        Observable.concat(DatabaseHelper.getInstance(StoryProjectApp.getAppContext()).getAllStories(), getStoryListFromJson())
                 .filter(stories -> !stories.isEmpty())
                 .first()
                 .flatMap(Observable::from)
@@ -175,5 +195,12 @@ public class StoryListActivity extends AppCompatActivity {
         for (User user : userList) {
             DatabaseHelper.getInstance(this).addUser(user);
         }
+    }
+
+    @Override
+    public void onFollowClicked(String userID) {
+        if (userIDList.contains(userID))
+            userIDList.remove(userID);
+        else userIDList.add(userID);
     }
 }

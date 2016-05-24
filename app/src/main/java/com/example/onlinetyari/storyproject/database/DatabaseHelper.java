@@ -350,4 +350,36 @@ public class DatabaseHelper extends SQLiteOpenHelper implements DatabaseHelperIn
 
         return returnValue;
     }
+
+    @Override
+    public void updateUser(User user) {
+
+        SQLiteDatabase db = getWritableDatabase();
+
+        db.beginTransaction();
+
+        try {
+
+
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(KEY_USER_ABOUT, user.getAbout());
+            contentValues.put(KEY_USER_USERNAME, user.getUsername());
+            contentValues.put(KEY_USER_FOLLOWERS, user.getFollowers());
+            contentValues.put(KEY_USER_FOLLOWING, user.getFollowing());
+            contentValues.put(KEY_USER_IMAGE, user.getImage());
+            contentValues.put(KEY_USER_URL, user.getUrl());
+            contentValues.put(KEY_USER_HANDLE, user.getHandle());
+            contentValues.put(KEY_USER_IS_FOLLOWING, user.getIs_following());
+            contentValues.put(KEY_USER_CREATED_ON, user.getCreatedOn());
+            contentValues.put(KEY_USER_ID, user.getId());
+
+            db.update(TABLE_USER, contentValues, KEY_USER_ID + " = ?", new String[]{user.getId()});
+            db.setTransactionSuccessful();
+
+        } catch (Exception e) {
+            DebugHandler.LogException(DebugConstants.DATABASE_ERROR_LOG, e);
+        } finally {
+            db.endTransaction();
+        }
+    }
 }

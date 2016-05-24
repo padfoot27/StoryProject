@@ -1,4 +1,4 @@
-package com.example.onlinetyari.storyproject;
+package com.example.onlinetyari.storyproject.deserializer;
 
 import com.example.onlinetyari.storyproject.pojo.User;
 import com.google.gson.JsonDeserializationContext;

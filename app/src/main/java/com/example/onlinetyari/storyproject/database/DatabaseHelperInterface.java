@@ -23,4 +23,6 @@ public interface DatabaseHelperInterface {
     boolean storyExists(Story story);
 
     boolean userExists(User user);
+
+    void updateUser(User user);
 }
