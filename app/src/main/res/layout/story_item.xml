@@ -69,6 +69,8 @@
             android:id="@+id/story_description"
             android:layout_marginBottom="@dimen/eight"
             android:paddingLeft="@dimen/eight"
+            android:textColorLink="@color/link"
+            android:autoLink="all"
             android:paddingRight="@dimen/eight"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />

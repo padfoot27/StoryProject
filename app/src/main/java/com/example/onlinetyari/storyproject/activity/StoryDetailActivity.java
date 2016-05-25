@@ -2,11 +2,8 @@ package com.example.onlinetyari.storyproject.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -17,9 +14,7 @@ import com.example.onlinetyari.storyproject.StoryProjectApp;
 import com.example.onlinetyari.storyproject.adapter.StoryAdapter;
 import com.example.onlinetyari.storyproject.constants.IntentConstants;
 import com.example.onlinetyari.storyproject.database.DatabaseHelper;
-import com.example.onlinetyari.storyproject.pojo.Story;
 import com.example.onlinetyari.storyproject.pojo.User;
-import com.jakewharton.rxbinding.view.RxView;
 
 public class StoryDetailActivity extends AppCompatActivity {
 
@@ -60,8 +55,7 @@ public class StoryDetailActivity extends AppCompatActivity {
         title.setText(titleVal);
 
         assert posted_by != null;
-        posted_by.setText(username);
-
+        posted_by.setText(String.format(getResources().getString(R.string.by), username) );
 
         assert follow != null;
         if (isFollowing != null) {
@@ -79,7 +73,6 @@ public class StoryDetailActivity extends AppCompatActivity {
                 .with(this)
                 .load(imageURL)
                 .placeholder(R.drawable.images)
-                .crossFade()
                 .into(image);
 
 

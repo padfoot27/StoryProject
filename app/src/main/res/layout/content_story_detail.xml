@@ -57,6 +57,8 @@
     <TextView
         android:id="@+id/story_description_detail"
         android:layout_marginBottom="@dimen/four"
+        android:textColorLink="@color/link"
+        android:autoLink="all"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 

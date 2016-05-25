@@ -7,4 +7,5 @@
     <string name="comments">%1d Comments</string>
     <string name="follow">Follow</string>
     <string name="following">Following</string>
+    <string name="by">by %1s</string>
 </resources>

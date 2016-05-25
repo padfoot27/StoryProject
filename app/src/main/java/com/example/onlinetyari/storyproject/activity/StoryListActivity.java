@@ -6,7 +6,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -126,7 +125,6 @@ public class StoryListActivity extends AppCompatActivity implements StoryAdapter
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(story -> {
-                    Log.v("abc", story.getTitle());
                     DatabaseHelper.getInstance(StoryProjectApp.getAppContext()).addStory(story);
 
                     if (story.user == null) {

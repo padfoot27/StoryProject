@@ -82,7 +82,7 @@ public class StoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         Story story = mStory.get(position);
 
         storyViewHolder.title.setText(story.getTitle());
-        storyViewHolder.posted_by.setText(story.getUser().getUsername());
+        storyViewHolder.posted_by.setText(String.format(resources.getString(R.string.by), story.getUser().getUsername()));
 
         if (story.user.getIs_following() != null) {
             if (story.user.getIs_following() == 0)
@@ -99,7 +99,6 @@ public class StoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 .listener(requestListener)
                 .placeholder(R.drawable.images)
                 .error(R.drawable.trouble_afoot)
-                .crossFade()
                 .into(storyViewHolder.story_image);
 
         storyViewHolder.story_description.setText(story.getDescription());
