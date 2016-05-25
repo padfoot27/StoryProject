@@ -1,7 +1,9 @@
 package com.example.onlinetyari.storyproject.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
+import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,17 +16,15 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.example.onlinetyari.storyproject.R;
 import com.example.onlinetyari.storyproject.StoryProjectApp;
+import com.example.onlinetyari.storyproject.activity.StoryDetailActivity;
 import com.example.onlinetyari.storyproject.activity.StoryListActivity;
+import com.example.onlinetyari.storyproject.constants.IntentConstants;
 import com.example.onlinetyari.storyproject.database.DatabaseHelper;
 import com.example.onlinetyari.storyproject.pojo.Story;
 import com.example.onlinetyari.storyproject.pojo.User;
-import com.jakewharton.rxbinding.view.RxView;
 
 import java.util.List;
 
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
 
 /**
  * Created by Siddharth Verma on 24/5/16.
@@ -36,7 +36,7 @@ public class StoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     private Context context;
     private Resources resources;
     public OnFollowClickedListener onFollowClickedListener;
-    public String FOLLOW = "Follow";
+    public static final String FOLLOW = "Follow";
 
     public interface OnFollowClickedListener {
         void onFollowClicked(String userID);
@@ -106,20 +106,33 @@ public class StoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         storyViewHolder.likes.setText(String.format(resources.getString(R.string.likes), story.getLikes_count()));
         storyViewHolder.comments.setText(String.format(resources.getString(R.string.comments), story.getComment_count()));
 
-        storyViewHolder.follow.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (storyViewHolder.follow.getText().toString().equals(FOLLOW))
-                    storyViewHolder.follow.setText(R.string.following);
-                else storyViewHolder.follow.setText(R.string.follow);
+        storyViewHolder.follow.setOnClickListener(v -> {
+            if (storyViewHolder.follow.getText().toString().equals(FOLLOW))
+                storyViewHolder.follow.setText(R.string.following);
+            else storyViewHolder.follow.setText(R.string.follow);
 
-                User user = story.getUser();
+            User user = story.getUser();
 
-                user.setIs_following(user.is_following ^= 1);
-                DatabaseHelper.getInstance(context).updateUser(user);
-                user.setIs_following(user.is_following ^= 1);
-                onFollowClickedListener.onFollowClicked(user.getId());
-            }
+            user.setIs_following(user.is_following ^= 1);
+            DatabaseHelper.getInstance(context).updateUser(user);
+            user.setIs_following(user.is_following ^= 1);
+            onFollowClickedListener.onFollowClicked(user.getId());
+        });
+
+        storyViewHolder.cardView.setOnClickListener(v -> {
+            Intent intent = new Intent(context, StoryDetailActivity.class);
+            Bundle bundle = new Bundle();
+            bundle.putString(IntentConstants.TITLE, story.getTitle());
+            bundle.putString(IntentConstants.USER_ID, story.getDb());
+            bundle.putInt(IntentConstants.IS_FOLLOWING, story.getUser().getIs_following());
+            bundle.putString(IntentConstants.USERNAME, story.getUser().getUsername());
+            bundle.putString(IntentConstants.IMAGE, story.getSi());
+            bundle.putString(IntentConstants.DESCRIPTION, story.getDescription());
+            bundle.putInt(IntentConstants.LIKES, story.getLikes_count());
+            bundle.putInt(IntentConstants.COMMENTS, story.getComment_count());
+
+            intent.putExtras(bundle);
+            context.startActivity(intent);
         });
     }
 

@@ -113,6 +113,30 @@ public class StoryListActivity extends AppCompatActivity implements StoryAdapter
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        storyAdapter.mStory.clear();
+        userIDList.clear();
+        DatabaseHelper.getInstance(StoryProjectApp.getAppContext()).getAllStories()
+                .flatMap(Observable::from)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(story -> {
+                    Log.v("abc", story.getTitle());
+                    DatabaseHelper.getInstance(StoryProjectApp.getAppContext()).addStory(story);
+
+                    if (story.user == null) {
+                        story.user = DatabaseHelper.getInstance(StoryProjectApp.getAppContext()).getUser(story.getDb());
+                    }
+
+                    if (!storyAdapter.mStory.contains(story)) {
+                        storyAdapter.mStory.add(story);
+                        storyAdapter.notifyItemChanged(storyAdapter.getItemCount() - 1);
+                    }
+                });
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_story_list, menu);

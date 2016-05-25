@@ -1,5 +1,6 @@
 package com.example.onlinetyari.storyproject.adapter;
 
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.Button;
@@ -20,6 +21,7 @@ public class StoryViewHolder extends RecyclerView.ViewHolder {
     TextView story_description;
     TextView likes;
     TextView comments;
+    CardView cardView;
 
     public StoryViewHolder(View view) {
         super(view);
@@ -31,5 +33,6 @@ public class StoryViewHolder extends RecyclerView.ViewHolder {
         story_description = (TextView) view.findViewById(R.id.story_description);
         likes = (TextView) view.findViewById(R.id.likes);
         comments = (TextView) view.findViewById(R.id.comments);
+        cardView = (CardView) view.findViewById(R.id.card_view);
     }
 }

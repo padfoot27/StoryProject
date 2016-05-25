@@ -2,10 +2,12 @@ package com.example.onlinetyari.storyproject.pojo;
 
 import com.google.gson.annotations.Expose;
 
+import java.io.Serializable;
+
 /**
  * Created by Siddharth Verma on 24/5/16.
  */
-public class Story {
+public class Story implements Serializable {
 
     @Expose
     public String description;

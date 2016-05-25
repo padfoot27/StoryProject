@@ -1,9 +1,11 @@
 package com.example.onlinetyari.storyproject.pojo;
 
+import java.io.Serializable;
+
 /**
  * Created by Siddharth Verma on 24/5/16.
  */
-public class User {
+public class User implements Serializable {
 
     public String about;
     public String id;
