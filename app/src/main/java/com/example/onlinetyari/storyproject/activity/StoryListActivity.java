@@ -80,6 +80,7 @@ public class StoryListActivity extends AppCompatActivity implements StoryAdapter
                 userIDList.clear();
             }
         });
+/*
 
         Observable.concat(DatabaseHelper.getInstance(StoryProjectApp.getAppContext()).getAllStories(), getStoryListFromJson())
                 .filter(stories -> !stories.isEmpty())
@@ -100,6 +101,7 @@ public class StoryListActivity extends AppCompatActivity implements StoryAdapter
                         storyAdapter.notifyItemChanged(storyAdapter.getItemCount() - 1);
                     }
                 });
+*/
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         assert fab != null;
@@ -117,7 +119,9 @@ public class StoryListActivity extends AppCompatActivity implements StoryAdapter
         super.onResume();
         storyAdapter.mStory.clear();
         userIDList.clear();
-        DatabaseHelper.getInstance(StoryProjectApp.getAppContext()).getAllStories()
+        Observable.concat(DatabaseHelper.getInstance(StoryProjectApp.getAppContext()).getAllStories(), getStoryListFromJson())
+                .filter(stories -> !stories.isEmpty())
+                .first()
                 .flatMap(Observable::from)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

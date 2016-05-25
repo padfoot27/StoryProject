@@ -97,7 +97,7 @@ public class StoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 .with(context)
                 .load(mStory.get(position).getSi())
                 .listener(requestListener)
-                .placeholder(R.drawable.drawer_image)
+                .placeholder(R.drawable.images)
                 .error(R.drawable.trouble_afoot)
                 .crossFade()
                 .into(storyViewHolder.story_image);
@@ -146,7 +146,7 @@ public class StoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 .with(context)
                 .load(imageURL)
                 .crossFade()
-                .placeholder(R.drawable.drawer_image)
+                .placeholder(R.drawable.images)
                 .error(R.drawable.trouble_afoot)
                 .into(imageView);
     }

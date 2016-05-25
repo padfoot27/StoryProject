@@ -78,6 +78,7 @@ public class StoryDetailActivity extends AppCompatActivity {
         Glide
                 .with(this)
                 .load(imageURL)
+                .placeholder(R.drawable.images)
                 .crossFade()
                 .into(image);
 
